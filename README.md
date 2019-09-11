@@ -5,4 +5,6 @@ Run with gradle:
 > ./gradlew bootRun
 
 Or, run in a container:
-> ./gradlew build && docker build -t storescp . && docker run -P --name testscp storescp 
+> ./gradlew build && docker build -t storescp . && docker run -P --name testscp storescp
+
+builds from [frolvlad/alpine-java](https://hub.docker.com/r/frolvlad/alpine-java)
