@@ -18,9 +18,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 @Component
-public class StorescpStarter implements CommandLineRunner {
+public class Starter implements CommandLineRunner {
 
-    private static final Logger LOG = LoggerFactory.getLogger(StorescpStarter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Starter.class);
 
     @Autowired
     private Config config;
