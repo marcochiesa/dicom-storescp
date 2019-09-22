@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class StorescpApplication {
+public class Application {
 
 	public static void main(String[] args) {
 		System.out.println("starting storescp");
-		SpringApplication.run(StorescpApplication.class, args);
+		SpringApplication.run(Application.class, args);
 	}
 }
