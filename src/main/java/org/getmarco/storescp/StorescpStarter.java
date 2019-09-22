@@ -23,17 +23,17 @@ public class StorescpStarter implements CommandLineRunner {
     private static final Logger LOG = LoggerFactory.getLogger(StorescpStarter.class);
 
     @Autowired
-    private StorescpConfig storescpConfig;
+    private Config config;
     private Device device;
     private ApplicationEntity ae;
     private Connection conn;
 
     @Override
     public void run(String... args) throws Exception {
-        String deviceName = storescpConfig.getDeviceName();
+        String deviceName = config.getDeviceName();
         if (!StringUtils.hasText(deviceName))
             throw new IllegalArgumentException("empty device name");
-        int port = storescpConfig.getPort();
+        int port = config.getPort();
         if (port <= 0)
             throw new IllegalArgumentException("invalid port: " + port);
         LOG.info("creating device {} on port {}", deviceName, port);

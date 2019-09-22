@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @ConfigurationProperties(prefix = "storescp")
-public class StorescpConfig {
+public class Config {
 
     private String deviceName;
     private int port;
