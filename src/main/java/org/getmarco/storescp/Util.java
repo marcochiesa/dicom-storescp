@@ -9,6 +9,12 @@ import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 public class Util {
     public static void logAssociation(Logger logger, Association association) {
@@ -45,6 +51,23 @@ public class Util {
         try (DicomInputStream in = new DicomInputStream(file)) {
             in.setIncludeBulkData(DicomInputStream.IncludeBulkData.NO);
             return in.readDataset(-1, Tag.PixelData);
+        }
+    }
+
+    public static void zipDir(Path sourceDir, Path zipFile) throws IOException {
+        Files.createFile(zipFile);
+        try (ZipOutputStream zs = new ZipOutputStream(Files.newOutputStream(zipFile)); Stream<Path> stream = Files.walk(sourceDir)) {
+            stream.filter(path -> !Files.isDirectory(path))
+              .forEach(path -> {
+                  ZipEntry zipEntry = new ZipEntry(sourceDir.relativize(path).toString());
+                  try {
+                      zs.putNextEntry(zipEntry);
+                      Files.copy(path, zs);
+                      zs.closeEntry();
+                  } catch (IOException e) {
+                      throw new RuntimeException("error writing file to zip: " + zipEntry, e);
+                  }
+              });
         }
     }
 }
