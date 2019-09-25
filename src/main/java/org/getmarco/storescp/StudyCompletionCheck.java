@@ -19,6 +19,8 @@ public class StudyCompletionCheck {
 
     @Autowired
     private Config config;
+    @Autowired
+    private StudyProcessor processor;
     private Path storageDir;
     private Path incomingDir;
     private Path zipDir;
@@ -52,10 +54,19 @@ public class StudyCompletionCheck {
 
     private void processCompleteStudy(Path studyPath) {
         LOG.info("found complete study: {}", studyPath);
-        String studyUID = studyPath.getFileName().toString();
-        StudyProcessor processor = new StudyProcessor(studyPath);
-        processor.process();
-        LOG.info("finished processing complete study: " + studyUID);
+        Path study = studyPath.getFileName(); //value of study uid
+        Path dest = this.zipDir.resolve(study);
+        if (Files.exists(dest)) {
+            throw new IllegalStateException("unable to move study dir '" + studyPath
+              + "' for processing, destination '"+ dest + "' already exists");
+        }
+        try {
+            Files.move(studyPath, dest);
+        } catch (IOException e) {
+            LOG.error("unable to move study dir for processing: " + studyPath, e);
+        }
+        processor.process(dest);
+        LOG.info("finished processing complete study: " + study);
     }
 
     public boolean workDir(Path path) {

@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 public class Config {
     public static final String PART_EXT = ".part";
     public static final String DCM_EXT = ".dcm";
+    public static final String ZIP_EXT = ".zip";
+    public static final String TXT_EXT = ".txt";
     public static final String INCOMING_DIR = "incoming";
     public static final String ZIP_DIR = "zip";
 
