@@ -1,5 +1,6 @@
 package org.getmarco.storescp;
 
+import com.amazonaws.services.s3.AmazonS3;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.dcm4che3.data.Attributes;
 import org.slf4j.Logger;
@@ -9,6 +10,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -21,6 +23,8 @@ public class StudyProcessor {
 
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private AmazonS3 s3;
     @Autowired
     private Config config;
     private Path storageDir;
@@ -65,8 +69,19 @@ public class StudyProcessor {
             return;
         }
 
-        // Copy metadata file to S3
         // Copy zip to S3
+        s3.putObject(
+          config.getStorageBucket(),
+          Config.FILES_BUCKET_PREFIX + zipFile.getFileName().toString(),
+          zipFile.toFile()
+        );
+        // Copy metadata file to S3
+        s3.putObject(
+          config.getStorageBucket(),
+          Config.METADATA_BUCKET_PREFIX + metaFile.getFileName().toString(),
+          metaFile.toFile()
+        );
+
         // delete metadata file
         try {
             Files.delete(metaFile);

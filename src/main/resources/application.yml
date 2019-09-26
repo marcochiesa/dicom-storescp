@@ -3,4 +3,6 @@ storescp.port: 11118
 storescp.storage-dir: delete/storescp #set to /temp after testing
 storescp.study-wait-time: 30000 #milliseconds, set to 10 min after testing
 storescp.clear-storage-directory-on-start: true #warning - will delete all contents of storage directory
+storescp.storage-bucket: my-test-bucket
+storescp.storage-bucket-region: us-east-1
 #Todo: add accepted AE Titles

@@ -12,9 +12,14 @@ public class Config {
     public static final String TXT_EXT = ".txt";
     public static final String INCOMING_DIR = "incoming";
     public static final String ZIP_DIR = "zip";
+    public static final String DICOMDIR = "DICOMDIR";
+    public static final String METADATA_BUCKET_PREFIX = "metadata/";
+    public static final String FILES_BUCKET_PREFIX = "files/";
 
     private String deviceName;
     private String storageDir;
+    private String storageBucket;
+    private String getStorageBucketRegion;
     private int port;
     private int studyWaitTime;
     private boolean clearStorageDirectoryOnStart;
@@ -33,6 +38,22 @@ public class Config {
 
     public void setStorageDir(String storageDir) {
         this.storageDir = storageDir;
+    }
+
+    public String getStorageBucket() {
+        return storageBucket;
+    }
+
+    public void setStorageBucket(String storageBucket) {
+        this.storageBucket = storageBucket;
+    }
+
+    public String getGetStorageBucketRegion() {
+        return getStorageBucketRegion;
+    }
+
+    public void setGetStorageBucketRegion(String getStorageBucketRegion) {
+        this.getStorageBucketRegion = getStorageBucketRegion;
     }
 
     public int getPort() {
