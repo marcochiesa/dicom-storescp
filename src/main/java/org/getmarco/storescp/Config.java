@@ -19,7 +19,7 @@ public class Config {
     private String deviceName;
     private String storageDir;
     private String storageBucket;
-    private String getStorageBucketRegion;
+    private String storageBucketRegion;
     private int port;
     private int studyWaitTime;
     private boolean clearStorageDirectoryOnStart;
@@ -48,12 +48,12 @@ public class Config {
         this.storageBucket = storageBucket;
     }
 
-    public String getGetStorageBucketRegion() {
-        return getStorageBucketRegion;
+    public String getStorageBucketRegion() {
+        return storageBucketRegion;
     }
 
-    public void setGetStorageBucketRegion(String getStorageBucketRegion) {
-        this.getStorageBucketRegion = getStorageBucketRegion;
+    public void setStorageBucketRegion(String storageBucketRegion) {
+        this.storageBucketRegion = storageBucketRegion;
     }
 
     public int getPort() {

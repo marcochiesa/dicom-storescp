@@ -30,7 +30,7 @@ public class Application implements AsyncConfigurer {
 
 	@Bean
 	public AmazonS3 s3Client() {
-		return AmazonS3ClientBuilder.standard().withRegion(config.getGetStorageBucketRegion()).build();
+		return AmazonS3ClientBuilder.standard().withRegion(config.getStorageBucketRegion()).build();
 	}
 
 	@Override
