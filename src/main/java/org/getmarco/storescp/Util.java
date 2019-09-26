@@ -7,16 +7,20 @@ import org.dcm4che3.net.Association;
 import org.dcm4che3.util.StringUtils;
 import org.slf4j.Logger;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.Objects;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 public class Util {
+    private Util() {
+        // It's a utility method class
+        throw new AssertionError("No Util instances for you!");
+    }
+
     public static void logAssociation(Logger logger, Association association) {
         logger.info("state: {}", association.getState());
         String localAET = association.getLocalAET();
@@ -47,11 +51,28 @@ public class Util {
         logger.info(sb.toString());
     }
 
-    public static Attributes parse(File file) throws IOException {
-        try (DicomInputStream in = new DicomInputStream(file)) {
+    public static Attributes parse(Path dicomFile) throws IOException {
+        try (DicomInputStream in = new DicomInputStream(dicomFile.toFile())) {
             in.setIncludeBulkData(DicomInputStream.IncludeBulkData.NO);
             return in.readDataset(-1, Tag.PixelData);
         }
+    }
+
+    public static Attributes parseDir(Path dicomDir) throws IOException {
+        Attributes attributes = null;
+        try (Stream<Path> stream = Files.list(dicomDir)) {
+            attributes = stream.map(path -> {
+                try {
+                    return parse(path);
+                } catch (IOException e) {
+                    return null;
+                }
+            }).filter(Objects::nonNull).findAny().orElse(null);
+        }
+        if (attributes != null)
+            return attributes;
+        else
+            throw new RuntimeException("unable to read dicom attributes from any file in directory: " + dicomDir);
     }
 
     public static void zipDir(Path sourceDir, Path zipFile) throws IOException {

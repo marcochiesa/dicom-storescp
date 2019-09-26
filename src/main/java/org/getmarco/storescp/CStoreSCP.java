@@ -45,7 +45,7 @@ public class CStoreSCP extends BasicCStoreSCP {
             deleteFile(as, incomingFile.toFile());
         }
 
-        Attributes attributes = Util.parse(incomingFile.toFile());
+        Attributes attributes = Util.parse(incomingFile);
         Util.logDicomFileAttributes(LOG, attributes);
         Path studyFile = Paths.get(storageDir, as.getLocalAET(), attributes.getString(Tag.StudyInstanceUID), iuid + Config.DCM_EXT);
         try {

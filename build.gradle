@@ -21,6 +21,7 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.springframework.boot:spring-boot-starter-json'
 	implementation('org.dcm4che:dcm4che-core:5.18.1') {
 		exclude group: 'org.slf4j'
 	}
