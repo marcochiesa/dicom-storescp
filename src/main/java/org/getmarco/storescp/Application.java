@@ -2,9 +2,13 @@ package org.getmarco.storescp;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -35,7 +39,13 @@ public class Application implements AsyncConfigurer {
 
 	@Override
 	public Executor getAsyncExecutor() {
-		return new ThreadPoolTaskExecutor();
+		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+		executor.setCorePoolSize(3);
+		executor.setMaxPoolSize(10);
+		executor.setQueueCapacity(5);
+		executor.setThreadNamePrefix("scp-async-");
+		executor.initialize();
+		return executor;
 	}
 
 	@Override
@@ -44,14 +54,12 @@ public class Application implements AsyncConfigurer {
 	}
 
 	public static class CustomAsyncExceptionHandler implements AsyncUncaughtExceptionHandler {
+		private static final Logger LOG = LoggerFactory.getLogger(CustomAsyncExceptionHandler.class);
 		@Override
 		public void handleUncaughtException(
 		Throwable throwable, Method method, Object... obj) {
-			System.out.println("Exception message - " + throwable.getMessage());
-			System.out.println("Method name - " + method.getName());
-			for (Object param : obj) {
-				System.out.println("Parameter value - " + param);
-			}
+			LOG.error("async-uncaught-exception '{}' at method: {}, params: {}", throwable.getMessage(),
+			  method.getName(), Stream.of(obj).map(Object::toString).collect(Collectors.toList()));
 		}
 	}
 }
