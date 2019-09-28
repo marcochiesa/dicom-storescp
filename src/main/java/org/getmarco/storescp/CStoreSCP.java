@@ -40,7 +40,7 @@ public class CStoreSCP extends BasicCStoreSCP {
         // Also, check that the remote ae is allowed to transfer files to that ae
         String callingAET = as.getCallingAET();
         String calledAET = as.getCalledAET();
-        if (!config.isAcceptedLocalAetitle(callingAET))
+        if (!config.isAcceptedLocalAetitle(calledAET))
             throw new DicomServiceException(Status.NotAuthorized, "called ae title is unknown: " + calledAET);
         if (!config.hasAetitlePair(callingAET, calledAET))
             throw new DicomServiceException(Status.NotAuthorized, "calling ae title is unknown: " + callingAET);

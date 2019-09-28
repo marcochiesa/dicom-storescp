@@ -1,5 +1,7 @@
 package org.getmarco.storescp;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -7,6 +9,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+@Getter
+@Setter
 @Component
 @ConfigurationProperties(prefix = "storescp")
 public class Config {
@@ -31,62 +35,6 @@ public class Config {
     private int port;
     private boolean clearStorageDirectoryOnStart;
     private Map<String, Map<String, Integer>> aetitlePairs;
-
-    public String getDeviceName() {
-        return deviceName;
-    }
-
-    public void setDeviceName(String deviceName) {
-        this.deviceName = deviceName;
-    }
-
-    public String getStorageDir() {
-        return storageDir;
-    }
-
-    public void setStorageDir(String storageDir) {
-        this.storageDir = storageDir;
-    }
-
-    public String getStorageBucket() {
-        return storageBucket;
-    }
-
-    public void setStorageBucket(String storageBucket) {
-        this.storageBucket = storageBucket;
-    }
-
-    public String getStorageBucketRegion() {
-        return storageBucketRegion;
-    }
-
-    public void setStorageBucketRegion(String storageBucketRegion) {
-        this.storageBucketRegion = storageBucketRegion;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public void setPort(int port) {
-        this.port = port;
-    }
-
-    public boolean isClearStorageDirectoryOnStart() {
-        return clearStorageDirectoryOnStart;
-    }
-
-    public void setClearStorageDirectoryOnStart(boolean clearStorageDirectoryOnStart) {
-        this.clearStorageDirectoryOnStart = clearStorageDirectoryOnStart;
-    }
-
-    public Map<String, Map<String, Integer>> getAetitlePairs() {
-        return aetitlePairs;
-    }
-
-    public void setAetitlePairs(Map<String, Map<String, Integer>> aetitlePairs) {
-        this.aetitlePairs = aetitlePairs;
-    }
 
     public Integer getStudyWaitTime(String callingAET, String calledAET) {
         Objects.requireNonNull(calledAET, "null called AE Title");
