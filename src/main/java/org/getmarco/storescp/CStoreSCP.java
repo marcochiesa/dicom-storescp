@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
@@ -38,6 +39,7 @@ public class CStoreSCP extends BasicCStoreSCP {
         String cuid = rq.getString(Tag.AffectedSOPClassUID);
         String iuid = rq.getString(Tag.AffectedSOPInstanceUID);
         String tsuid = pc.getTransferSyntax();
+        // Store incoming file with path like <storage dir>/incoming/7c10c8cd-1536-4510-8cb7-c17570abe3dd.part
         Path incomingFile = Paths.get(storageDir, Config.INCOMING_DIR, UUID.randomUUID().toString() + Config.PART_EXT);
         try {
             storeTo(as, as.createFileMetaInformation(iuid, cuid, tsuid), data, incomingFile.toFile());
@@ -47,7 +49,11 @@ public class CStoreSCP extends BasicCStoreSCP {
 
         Attributes attributes = Util.parse(incomingFile);
         Util.logDicomFileAttributes(LOG, attributes);
-        Path studyFile = Paths.get(storageDir, as.getLocalAET(), attributes.getString(Tag.StudyInstanceUID), iuid + Config.DCM_EXT);
+        // Move to path like <storage dir>/SCP/SCU/1.2.840.xxxxx.3.152.235.2.12.187636473/1.2.840.xxxxx.3.152.235.2.12.187636473.dcm
+        Path studyFile = Paths.get(storageDir, as.getLocalAET(), as.getRemoteAET(), attributes.getString(Tag.StudyInstanceUID), iuid + Config.DCM_EXT);
+        // Sanity check
+        if (Files.exists(studyFile))
+            throw new IllegalStateException("file already exists: " + studyFile);
         try {
             renameTo(as, incomingFile.toFile() , studyFile.toFile());
         } catch (Exception e) {

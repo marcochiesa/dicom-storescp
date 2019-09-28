@@ -1,9 +1,13 @@
 storescp:
     device-name: testscp
-    port: 11118
+    port: 11117
     storage-dir: delete/storescp #set to /temp after testing
-    study-wait-time: 30000 #milliseconds, set to 10 min after testing
     clear-storage-directory-on-start: true #warning - will delete all contents of storage directory
-    storage-bucket: my-test-bucket
+    storage-bucket: my-dicom-upload
     storage-bucket-region: us-east-1
-#Todo: add accepted AE Titles
+    aetitle-pairs: #called AE Title - calling AE Title - study wait time (milliseconds)
+        SCP:
+            SCU: 10000
+        test:
+            SCU: 60000
+            test: 180000

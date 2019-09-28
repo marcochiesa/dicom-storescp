@@ -3,6 +3,10 @@ package org.getmarco.storescp;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
 @Component
 @ConfigurationProperties(prefix = "storescp")
 public class Config {
@@ -15,14 +19,18 @@ public class Config {
     public static final String DICOMDIR = "DICOMDIR";
     public static final String METADATA_BUCKET_PREFIX = "metadata/";
     public static final String FILES_BUCKET_PREFIX = "files/";
+    // Default value 10 minutes if AE Title pair not configured (milliseconds)
+    // Study wait time is used as a timeout value to determine if all the files in a study have been received.
+    // DICOM transfers don't indicate how many files are in a study, so have to wait until they stop coming.
+    public static final int DEFAULT_STUDY_WAIT_TIME = 600000;
 
     private String deviceName;
     private String storageDir;
     private String storageBucket;
     private String storageBucketRegion;
     private int port;
-    private int studyWaitTime;
     private boolean clearStorageDirectoryOnStart;
+    private Map<String, Map<String, Integer>> aetitlePairs;
 
     public String getDeviceName() {
         return deviceName;
@@ -64,19 +72,26 @@ public class Config {
         this.port = port;
     }
 
-    public int getStudyWaitTime() {
-        return studyWaitTime;
-    }
-
-    public void setStudyWaitTime(int studyWaitTime) {
-        this.studyWaitTime = studyWaitTime;
-    }
-
     public boolean isClearStorageDirectoryOnStart() {
         return clearStorageDirectoryOnStart;
     }
 
     public void setClearStorageDirectoryOnStart(boolean clearStorageDirectoryOnStart) {
         this.clearStorageDirectoryOnStart = clearStorageDirectoryOnStart;
+    }
+
+    public Map<String, Map<String, Integer>> getAetitlePairs() {
+        return aetitlePairs;
+    }
+
+    public void setAetitlePairs(Map<String, Map<String, Integer>> aetitlePairs) {
+        this.aetitlePairs = aetitlePairs;
+    }
+
+    public Integer getStudyWaitTime(String calledAET, String callingAET) {
+        Objects.requireNonNull(calledAET, "null called AE Title");
+        Objects.requireNonNull(callingAET, "null calling AE Title");
+        return Optional.ofNullable(this.getAetitlePairs().get(calledAET))
+          .map(x -> x.get(callingAET)).orElse(DEFAULT_STUDY_WAIT_TIME);
     }
 }

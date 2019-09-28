@@ -1,5 +1,6 @@
 package org.getmarco.storescp;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.dcm4che3.net.ApplicationEntity;
 import org.dcm4che3.net.Connection;
 import org.dcm4che3.net.Device;
@@ -33,6 +34,8 @@ public class Starter implements CommandLineRunner {
     private Finisher finisher;
     @Autowired
     private CStoreSCP storeSCP;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private Device device;
     private ApplicationEntity ae;
@@ -101,6 +104,9 @@ public class Starter implements CommandLineRunner {
         Files.createDirectory(zipDir);
         if (!Files.exists(zipDir))
             fail("unable to create incoming directory: " + zipDir);
+
+        // Display current allowed AE pairings and their configured study wait time
+        LOG.info("aes: {}", objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(config.getAetitlePairs()));
     }
 
     private DicomServiceRegistry createServiceRegistry() {
