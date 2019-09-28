@@ -8,13 +8,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.util.FileSystemUtils;
 
-import javax.annotation.PostConstruct;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Objects;
 
 @Component
@@ -27,21 +25,13 @@ public class StudyProcessor {
     private AmazonS3 s3;
     @Autowired
     private Config config;
-    private Path storageDir;
-    private Path incomingDir;
-    private Path zipDir;
-
-    @PostConstruct
-    private void setup() {
-        this.storageDir = Paths.get(config.getStorageDir());
-        this.incomingDir = this.storageDir.resolve(Config.INCOMING_DIR);
-        this.zipDir = this.storageDir.resolve(Config.ZIP_DIR);
-    }
 
     @Async
     public void process(Path studyDir) {
         Objects.requireNonNull(studyDir,"null study path");
-        Path study = studyDir.getFileName(); //value of study uid
+        Path studyDirName = studyDir.getFileName(); //uuid value
+        Path metaFile = studyDir.getParent().resolve(studyDirName.toString() + Config.TXT_EXT);
+        Path zipFile = studyDir.getParent().resolve(studyDirName.toString() + Config.ZIP_EXT);
 
         // Create metadata file
         MetaData metaData = null;
@@ -52,7 +42,6 @@ public class StudyProcessor {
             LOG.error("unable to parse dicom attributes from study directory: " + studyDir);
             return;
         }
-        Path metaFile = studyDir.getParent().resolve(study.toString() + Config.TXT_EXT);
         try {
             this.objectMapper.writeValue(metaFile.toFile(), metaData);
         } catch (IOException e) {
@@ -61,7 +50,6 @@ public class StudyProcessor {
         }
 
         // Zip study directory
-        Path zipFile = studyDir.getParent().resolve(study.toString() + Config.ZIP_EXT);
         try {
             Util.zipDir(studyDir, zipFile);
         } catch (IOException e) {
@@ -96,7 +84,7 @@ public class StudyProcessor {
         }
         // delete study directory
         try {
-            Files.delete(studyDir);
+            FileSystemUtils.deleteRecursively(studyDir);
         } catch(IOException e) {
             LOG.error("unable to delete study directory: " + studyDir, e);
         }
