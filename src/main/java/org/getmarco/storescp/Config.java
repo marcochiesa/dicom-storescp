@@ -88,10 +88,18 @@ public class Config {
         this.aetitlePairs = aetitlePairs;
     }
 
-    public Integer getStudyWaitTime(String calledAET, String callingAET) {
+    public Integer getStudyWaitTime(String callingAET, String calledAET) {
         Objects.requireNonNull(calledAET, "null called AE Title");
         Objects.requireNonNull(callingAET, "null calling AE Title");
         return Optional.ofNullable(this.getAetitlePairs().get(calledAET))
           .map(x -> x.get(callingAET)).orElse(DEFAULT_STUDY_WAIT_TIME);
+    }
+
+    public boolean isAcceptedLocalAetitle(String calledAET) {
+        return this.getAetitlePairs().get(calledAET) != null;
+    }
+
+    public boolean hasAetitlePair(String callingAET, String calledAET) {
+        return Optional.ofNullable(this.getAetitlePairs().get(calledAET)).map(x -> x.containsKey(callingAET)).orElse(false);
     }
 }

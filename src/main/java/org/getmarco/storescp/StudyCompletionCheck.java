@@ -49,7 +49,7 @@ public class StudyCompletionCheck {
         try (Stream<Path> callingAETDirs = Files.list(calledAETDir)) {
             callingAETDirs.forEach(callingAETDir -> {
                 String callingAET = callingAETDir.getFileName().toString();
-                int studyWaitTime = config.getStudyWaitTime(calledAET, callingAET);
+                int studyWaitTime = config.getStudyWaitTime(callingAET, calledAET);
                 try (Stream<Path> studyDirs = Files.list(callingAETDir)) {
                     studyDirs.forEach(studyDir -> {checkStudyDir(studyDir, studyWaitTime);});
                 } catch(IOException e) {

@@ -7,8 +7,10 @@ import org.dcm4che3.io.DicomOutputStream;
 import org.dcm4che3.net.Association;
 import org.dcm4che3.net.Dimse;
 import org.dcm4che3.net.PDVInputStream;
+import org.dcm4che3.net.Status;
 import org.dcm4che3.net.pdu.PresentationContext;
 import org.dcm4che3.net.service.BasicCStoreSCP;
+import org.dcm4che3.net.service.DicomServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +36,16 @@ public class CStoreSCP extends BasicCStoreSCP {
         LOG.info("receiving data to store");
         Util.logAssociation(LOG, as);
 
-        rsp.setInt(Tag.Status, VR.US, 0);
+        // Check that local application is configured to accept files at the called ae
+        // Also, check that the remote ae is allowed to transfer files to that ae
+        String callingAET = as.getCallingAET();
+        String calledAET = as.getCalledAET();
+        if (!config.isAcceptedLocalAetitle(callingAET))
+            throw new DicomServiceException(Status.NotAuthorized, "called ae title is unknown: " + calledAET);
+        if (!config.hasAetitlePair(callingAET, calledAET))
+            throw new DicomServiceException((Status.NotAuthorized, "calling ae title is unknown: " + callingAET));
+
+        rsp.setInt(Tag.Status, VR.US, Status.Success);
         String storageDir = config.getStorageDir();
         String cuid = rq.getString(Tag.AffectedSOPClassUID);
         String iuid = rq.getString(Tag.AffectedSOPInstanceUID);
@@ -50,7 +61,7 @@ public class CStoreSCP extends BasicCStoreSCP {
         Attributes attributes = Util.parse(incomingFile);
         Util.logDicomFileAttributes(LOG, attributes);
         // Move to path like <storage dir>/SCP/SCU/1.2.840.xxxxx.3.152.235.2.12.187636473/1.2.840.xxxxx.3.152.235.2.12.187636473.dcm
-        Path studyFile = Paths.get(storageDir, as.getLocalAET(), as.getRemoteAET(), attributes.getString(Tag.StudyInstanceUID), iuid + Config.DCM_EXT);
+        Path studyFile = Paths.get(storageDir, calledAET, callingAET, attributes.getString(Tag.StudyInstanceUID), iuid + Config.DCM_EXT);
         // Sanity check
         if (Files.exists(studyFile))
             throw new IllegalStateException("file already exists: " + studyFile);
