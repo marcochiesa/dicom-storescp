@@ -1,3 +1,7 @@
+info:
+    app-name: storescp
+#logging:
+#    file: logs/storescp.log
 storescp:
     device-name: testscp
     port: 11117
@@ -11,3 +15,11 @@ storescp:
         test:
             SCU: 60000
             test: 180000
+management:
+    endpoints:
+        web:
+            exposure:
+                include: "*"
+#    server:
+#        port: 8080
+#        address: 127.0.0.1

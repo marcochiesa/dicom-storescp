@@ -1,6 +1,7 @@
 plugins {
 	id 'org.springframework.boot' version '2.1.8.RELEASE'
 	id 'io.spring.dependency-management' version '1.0.8.RELEASE'
+	id "com.gorylenko.gradle-git-properties" version "2.2.0"
 	id 'java'
 }
 
@@ -20,6 +21,7 @@ repositories {
 }
 
 dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web' //only for spring boot actuator endpoints
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-json'
 	implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.631')
