@@ -9,10 +9,8 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.UUID;
 import java.util.stream.Stream;
-import javax.annotation.PostConstruct;
 
 @Component
 public class StudyCompletionCheck {
@@ -22,25 +20,16 @@ public class StudyCompletionCheck {
     private Config config;
     @Autowired
     private StudyProcessor processor;
-    private Path storageDir;
-    private Path incomingDir;
-    private Path zipDir;
-
-    @PostConstruct
-    private void setup() {
-        this.storageDir = Paths.get(config.getStorageDir());
-        this.incomingDir = this.storageDir.resolve(Config.INCOMING_DIR);
-        this.zipDir = this.storageDir.resolve(Config.ZIP_DIR);
-    }
 
     // Todo: set to one minute interval after testing
     @Scheduled(fixedDelay = 5000)
     public void checkCompletion() {
         LOG.debug("check for completed studies");
-        try (Stream<Path> stream = Files.list(this.storageDir)) {
-            stream.filter(this::isCalledAETDir).forEach(this::checkCalledAETDir);
+        Path storageDir = config.getStorageDirPath();
+        try (Stream<Path> stream = Files.list(storageDir)) {
+            stream.filter(config::isCalledAETDir).forEach(this::checkCalledAETDir);
         } catch(IOException e) {
-            LOG.error("unable to open storage directory: " + this.storageDir, e);
+            LOG.error("unable to open storage directory: " + storageDir, e);
         }
     }
 
@@ -68,7 +57,7 @@ public class StudyCompletionCheck {
 
     private void processCompleteStudy(Path studyPath) {
         LOG.info("found complete study: {}", studyPath);
-        Path dest = this.zipDir.resolve(UUID.randomUUID().toString());
+        Path dest = config.getZipDirPath().resolve(UUID.randomUUID().toString());
         try {
             Files.move(studyPath, dest);
         } catch (IOException e) {
@@ -76,26 +65,6 @@ public class StudyCompletionCheck {
         }
         processor.process(dest);
         LOG.info("finished processing complete study: " + studyPath);
-    }
-
-    public boolean isCalledAETDir(Path path) {
-        if (!Files.isDirectory(path))
-            return false;
-        try {
-            if (Files.isSameFile(this.incomingDir, path))
-                return false;
-        } catch (IOException e) {
-            LOG.error("error comparing path '" + path + "' to incoming directory", e);
-            return false;
-        }
-        try {
-            if (Files.isSameFile(this.zipDir, path))
-                return false;
-        } catch (IOException e) {
-            LOG.error("error comparing path '" + path + "' to zip directory", e);
-            return false;
-        }
-        return true;
     }
 
     private boolean isStudyComplete(Path studyPath, int studyWaitTime) {

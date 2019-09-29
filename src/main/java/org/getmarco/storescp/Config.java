@@ -2,9 +2,15 @@ package org.getmarco.storescp;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -14,6 +20,8 @@ import java.util.Optional;
 @Component
 @ConfigurationProperties(prefix = "storescp")
 public class Config {
+    private static final Logger LOG = LoggerFactory.getLogger(Config.class);
+
     public static final String PART_EXT = ".part";
     public static final String DCM_EXT = ".dcm";
     public static final String ZIP_EXT = ".zip";
@@ -49,5 +57,37 @@ public class Config {
 
     public boolean hasAetitlePair(String callingAET, String calledAET) {
         return Optional.ofNullable(this.getAetitlePairs().get(calledAET)).map(x -> x.containsKey(callingAET)).orElse(false);
+    }
+
+    public Path getStorageDirPath() {
+        return Paths.get(getStorageDir());
+    }
+
+    public Path getIncomingDirPath() {
+        return this.getStorageDirPath().resolve(INCOMING_DIR);
+    }
+
+    public Path getZipDirPath() {
+        return this.getStorageDirPath().resolve(ZIP_DIR);
+    }
+
+    public boolean isCalledAETDir(Path path) {
+        if (!Files.isDirectory(path))
+            return false;
+        try {
+            if (Files.isSameFile(this.getIncomingDirPath(), path))
+                return false;
+        } catch (IOException e) {
+            LOG.error("error comparing path '" + path + "' to incoming directory", e);
+            return false;
+        }
+        try {
+            if (Files.isSameFile(this.getZipDirPath(), path))
+                return false;
+        } catch (IOException e) {
+            LOG.error("error comparing path '" + path + "' to zip directory", e);
+            return false;
+        }
+        return true;
     }
 }
