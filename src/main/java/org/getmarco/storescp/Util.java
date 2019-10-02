@@ -69,7 +69,7 @@ public class Util {
      * Parse a dicom file and return the collection of dicom attributes.
      * @param dicomFile the dicom file to parse
      * @return collection of dicom attributes
-     * @throws IOException
+     * @throws IOException if the file doesn't exist, is a directory, or cannot be processed as a dicom file
      */
     public static Attributes parse(Path dicomFile) throws IOException {
         try (DicomInputStream in = new DicomInputStream(dicomFile.toFile())) {
@@ -85,7 +85,7 @@ public class Util {
      * DICOMDIR file was sent).
      * @param dicomDir the directory to check
      * @return collection of dicom attributes for the study
-     * @throws IOException
+     * @throws IOException if unable to open the directory for processing
      */
     public static Attributes parseDir(Path dicomDir) throws IOException {
         Attributes attributes = null;
@@ -108,7 +108,7 @@ public class Util {
      * Create a zip archive from a given source directory.
      * @param sourceDir the directory to 'zip'
      * @param zipFile the zip archive file to create
-     * @throws IOException
+     * @throws IOException if unable to open the source directory or unable to create the output zip file
      */
     public static void zipDir(Path sourceDir, Path zipFile) throws IOException {
         Files.createFile(zipFile);
