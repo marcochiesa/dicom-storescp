@@ -28,7 +28,6 @@ public class Application implements AsyncConfigurer {
 	private Config config;
 
 	public static void main(String[] args) {
-		System.out.println("starting storescp");
 		SpringApplication.run(Application.class, args);
 	}
 

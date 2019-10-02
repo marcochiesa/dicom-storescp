@@ -15,12 +15,21 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+/**
+ * Convenience class for utility methods.
+ */
 public class Util {
     private Util() {
         // It's a utility method class
         throw new AssertionError("No Util instances for you!");
     }
 
+    /**
+     * Convenience method to log information about a dicom association (from
+     * another dicom compliant device).
+     * @param logger the logger to use
+     * @param association collection of dicom attributes
+     */
     public static void logAssociation(Logger logger, Association association) {
         logger.info("state: {}", association.getState());
         String localAET = association.getLocalAET();
@@ -34,6 +43,11 @@ public class Util {
         logger.info("to ae: {}", localAET);
     }
 
+    /**
+     * Convenience method to log information about an incoming dicom file transfer.
+     * @param logger the logger to use
+     * @param attributes collection of dicom attributes
+     */
     public static void logDicomFileAttributes(Logger logger, Attributes attributes) {
         StringBuilder sb = new StringBuilder();
         sb.append("file[")
@@ -51,6 +65,12 @@ public class Util {
         logger.info(sb.toString());
     }
 
+    /**
+     * Parse a dicom file and return the collection of dicom attributes.
+     * @param dicomFile the dicom file to parse
+     * @return collection of dicom attributes
+     * @throws IOException
+     */
     public static Attributes parse(Path dicomFile) throws IOException {
         try (DicomInputStream in = new DicomInputStream(dicomFile.toFile())) {
             in.setIncludeBulkData(DicomInputStream.IncludeBulkData.NO);
@@ -58,6 +78,15 @@ public class Util {
         }
     }
 
+    /**
+     * Parse a directory containing dicom files and return a collection of
+     * dicom attributes for the study. Expects the directory to represent a
+     * transferred study (assumes all files are for the same study, and no
+     * DICOMDIR file was sent).
+     * @param dicomDir the directory to check
+     * @return collection of dicom attributes for the study
+     * @throws IOException
+     */
     public static Attributes parseDir(Path dicomDir) throws IOException {
         Attributes attributes = null;
         try (Stream<Path> stream = Files.list(dicomDir)) {
@@ -75,6 +104,12 @@ public class Util {
             throw new RuntimeException("unable to read dicom attributes from any file in directory: " + dicomDir);
     }
 
+    /**
+     * Create a zip archive from a given source directory.
+     * @param sourceDir the directory to 'zip'
+     * @param zipFile the zip archive file to create
+     * @throws IOException
+     */
     public static void zipDir(Path sourceDir, Path zipFile) throws IOException {
         Files.createFile(zipFile);
         try (ZipOutputStream zs = new ZipOutputStream(Files.newOutputStream(zipFile)); Stream<Path> stream = Files.walk(sourceDir)) {

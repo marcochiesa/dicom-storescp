@@ -23,6 +23,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
+/**
+ * This class prepares and starts the Dcm4che-based storage service class provider (SCP).
+ */
 @Component
 public class Starter implements CommandLineRunner {
 
@@ -78,6 +81,7 @@ public class Starter implements CommandLineRunner {
         device.bindConnections();
         LOG.info("device started");
 
+        // Prepare filesystem workspace
         String storage = config.getStorageDir();
         LOG.info("checking storage directory: {}", storage);
         if (storage == null)

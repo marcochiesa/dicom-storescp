@@ -7,6 +7,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+/**
+ * Convenience class to cleanly shutdown the Spring {@link org.springframework.context.ApplicationContext ApplicationContext}
+ * and exit the JVM.
+ */
 @Component
 public class Finisher {
     private static final Logger LOG = LoggerFactory.getLogger(Finisher.class);

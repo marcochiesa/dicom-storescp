@@ -15,6 +15,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
+/**
+ * This class processes 'complete' dicom studies that have been received. This
+ * will include creating a zip archive with the dicom files for the study,
+ * creating a metadata file describing the study. uploading the zip archive and
+ * metadata file to S3, and finally deleting the study (zip archive, metadata
+ * file, original study directory).
+ */
 @Component
 public class StudyProcessor {
     private static final Logger LOG = LoggerFactory.getLogger(StudyProcessor.class);

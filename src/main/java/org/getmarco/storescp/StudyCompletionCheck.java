@@ -12,6 +12,11 @@ import java.nio.file.Path;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+/**
+ * This class runs a scheduled check to determine if incoming studies are
+ * 'complete'. If they are (no new files received within configured wait time),
+ *  then move them to the workarea for processing and trigger processing.
+ */
 @Component
 public class StudyCompletionCheck {
     private static final Logger LOG = LoggerFactory.getLogger(StudyCompletionCheck.class);
@@ -21,6 +26,9 @@ public class StudyCompletionCheck {
     @Autowired
     private StudyProcessor processor;
 
+    /**
+     * Check the filesystem workspace for 'complete' studies.
+     */
     // Todo: set to one minute interval after testing
     @Scheduled(fixedDelay = 5000)
     public void checkCompletion() {
@@ -33,28 +41,33 @@ public class StudyCompletionCheck {
         }
     }
 
+    // Check whether studies received for a particular AE Title are 'complete'.
     private void checkCalledAETDir(Path calledAETDir) {
-        String calledAET = calledAETDir.getFileName().toString();
         try (Stream<Path> callingAETDirs = Files.list(calledAETDir)) {
-            callingAETDirs.forEach(callingAETDir -> {
-                String callingAET = callingAETDir.getFileName().toString();
-                int studyWaitTime = config.getStudyWaitTime(callingAET, calledAET);
-                try (Stream<Path> studyDirs = Files.list(callingAETDir)) {
-                    studyDirs.forEach(studyDir -> {checkStudyDir(studyDir, studyWaitTime);});
-                } catch(IOException e) {
-                    LOG.error("unable to check calling AET directory: " + callingAETDir, e);
-                }
-            });
+            callingAETDirs.forEach(this::checkCallingAETDir);
         } catch(IOException e) {
             LOG.error("unable to check called AET directory: " + calledAETDir, e);
         }
     }
+    // Check whether studies received from a particular AE Title are 'complete'.
+    private void checkCallingAETDir(Path callingAETDir) {
+        String calledAET = callingAETDir.getParent().getFileName().toString();
+        String callingAET = callingAETDir.getFileName().toString();
+        int studyWaitTime = config.getStudyWaitTime(callingAET, calledAET);
+        try (Stream<Path> studyDirs = Files.list(callingAETDir)) {
+            studyDirs.forEach(studyDir -> {checkStudyDir(studyDir, studyWaitTime);});
+        } catch(IOException e) {
+            LOG.error("unable to check calling AET directory: " + callingAETDir, e);
+        }
+    }
 
-    private void checkStudyDir(Path studyDir, int waitTime) {
-        if (isStudyComplete(studyDir, waitTime))
+    // Check if a given study is 'complete'.
+    private void checkStudyDir(Path studyDir, int studyWaitTime) {
+        if (isStudyComplete(studyDir, studyWaitTime))
             processCompleteStudy(studyDir);
     }
 
+    // Prepare the 'completed' study for processing, and trigger processing.
     private void processCompleteStudy(Path studyPath) {
         LOG.info("found complete study: {}", studyPath);
         Path dest = config.getZipDirPath().resolve(UUID.randomUUID().toString());
@@ -67,7 +80,10 @@ public class StudyCompletionCheck {
         LOG.info("finished processing complete study: " + studyPath);
     }
 
-    private boolean isStudyComplete(Path studyPath, int studyWaitTime) {
+    // Check if the given filesystem path (assumed to be a directory holding
+    // dicom files for an incoming study) has not been modified within the
+    // configured study wait time.
+    private boolean isStudyComplete(Path studyDir, int studyWaitTime) {
         // Check if directory was last modified more than 'study wait time' milliseconds ago.
         //
         // File contents are not modified after the file is moved into the study directory
@@ -75,9 +91,9 @@ public class StudyCompletionCheck {
         // time of each file in the study directory.
         long studyLastModified = 0;
         try {
-            studyLastModified = Files.getLastModifiedTime(studyPath).toMillis();
+            studyLastModified = Files.getLastModifiedTime(studyDir).toMillis();
         } catch (IOException e) {
-            LOG.error("unable to read modification time for study directory" + studyPath);
+            LOG.error("unable to read modification time for study directory" + studyDir);
             return false;
         }
         return studyLastModified > 0 && (System.currentTimeMillis() - studyLastModified > studyWaitTime);

@@ -4,6 +4,10 @@ import lombok.Value;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 
+/**
+ * Simple value class to hold metadata about a transfered study. Serialized to
+ * a metadata file using the Jackson {@link com.fasterxml.jackson.databind.ObjectMapper ObjectMapper}.
+ */
 @Value
 public class MetaData {
     String patientId;

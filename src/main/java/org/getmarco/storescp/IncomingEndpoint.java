@@ -18,6 +18,11 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 
+/**
+ * Custom spring boot actuator (management) endpoint class to display
+ * information about in-progress incoming studies (dicom files have been
+ * received within a time window defined by the configured study wait time)
+ */
 @Component
 @Endpoint(id = "incoming")
 public class IncomingEndpoint {
@@ -30,6 +35,11 @@ public class IncomingEndpoint {
     @Autowired
     private Config config;
 
+    /**
+     * Produces display information about the studies that are currently
+     * in-progress
+     * @return mapping of display information
+     */
     @ReadOperation
     public Map<String, ? extends Object> incoming() {
         Map<String, List<Map<String, String>>> map = new TreeMap<>();

@@ -23,6 +23,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
+/**
+ * Implementing class for this application's storage service class provide (SCP).
+ */
 @Component
 public class CStoreSCP extends BasicCStoreSCP {
     private static final Logger LOG = LoggerFactory.getLogger(CStoreSCP.class);
@@ -50,7 +53,8 @@ public class CStoreSCP extends BasicCStoreSCP {
         String cuid = rq.getString(Tag.AffectedSOPClassUID);
         String iuid = rq.getString(Tag.AffectedSOPInstanceUID);
         String tsuid = pc.getTransferSyntax();
-        // Store incoming file with path like <storage dir>/incoming/7c10c8cd-1536-4510-8cb7-c17570abe3dd.part
+        // Store incoming file with path like:
+        // <storage dir>/incoming/7c10c8cd-1536-4510-8cb7-c17570abe3dd.part
         Path incomingFile = Paths.get(storageDir, Config.INCOMING_DIR, UUID.randomUUID().toString() + Config.PART_EXT);
         try {
             storeTo(as, as.createFileMetaInformation(iuid, cuid, tsuid), data, incomingFile.toFile());
@@ -60,8 +64,10 @@ public class CStoreSCP extends BasicCStoreSCP {
 
         Attributes attributes = Util.parse(incomingFile);
         Util.logDicomFileAttributes(LOG, attributes);
-        // Move to path like <storage dir>/SCP/SCU/1.2.840.xxxxx.3.152.235.2.12.187636473/1.2.840.xxxxx.3.152.235.2.12.187636473.dcm
-        Path studyFile = Paths.get(storageDir, calledAET, callingAET, attributes.getString(Tag.StudyInstanceUID), iuid + Config.DCM_EXT);
+        // Move to path like:
+        // <storage dir>/SCP/SCU/1.2.840.xxxxx.3.152.235.2.12.187658476/1.2.840.xxxxx.3.152.235.2.12.187636473.dcm
+        Path studyFile = Paths.get(storageDir, calledAET, callingAET, attributes.getString(Tag.StudyInstanceUID),
+          iuid + Config.DCM_EXT);
         // Sanity check
         if (Files.exists(studyFile))
             throw new IllegalStateException("file already exists: " + studyFile);
@@ -76,6 +82,7 @@ public class CStoreSCP extends BasicCStoreSCP {
         LOG.info("received {} cstore requests", numCstoreRqReceived);
     }
 
+    // Store dicom data to a file in the filesystem
     private void storeTo(Association as, Attributes fmi, PDVInputStream data, File file) throws IOException  {
         LOG.info("{}: M-WRITE {}", as, file);
         file.getParentFile().mkdirs();
@@ -85,6 +92,7 @@ public class CStoreSCP extends BasicCStoreSCP {
         }
     }
 
+    // Rename/move a filesytem file
     private void renameTo(Association as, File from, File dest) throws IOException {
         LOG.info("{}: M-RENAME {} to {}", as, from, dest);
         if (!dest.getParentFile().mkdirs())
@@ -93,6 +101,7 @@ public class CStoreSCP extends BasicCStoreSCP {
             throw new IOException("Failed to rename " + from + " to " + dest);
     }
 
+    // delete a file from the filesystem
     private void deleteFile(Association as, File file) {
         if (file.delete())
             LOG.info("{}: M-DELETE {}", as, file);
