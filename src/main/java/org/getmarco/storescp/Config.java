@@ -22,27 +22,31 @@ import java.util.Optional;
 public class Config {
     private static final Logger LOG = LoggerFactory.getLogger(Config.class);
 
-    // File extension for writing temporary incoming files
+    /** File extension for writing temporary incoming files */
     public static final String PART_EXT = ".part";
-    // File extension for transferred dicom files
+    /** File extension for transferred dicom files */
     public static final String DCM_EXT = ".dcm";
-    // File extension for created zip archives
+    /** File extension for created zip archives */
     public static final String ZIP_EXT = ".zip";
-    // File extension for created study metadata files
+    /** File extension for created study metadata files */
     public static final String TXT_EXT = ".txt";
-    // Temporary incoming file transfer storage area
+    /** Temporary incoming file transfer storage area */
     public static final String INCOMING_DIR = "incoming";
-    // Temporary work area for processing completed studies (create zip archive
-    // with all dicom files and create study metadata)
+    /**
+     * Temporary work area for processing completed studies (create zip archive
+     * with all dicom files and create study metadata)
+     */
     public static final String ZIP_DIR = "zip";
-    // S3 object 'directory' prefix when uploading metadata about dicom study
+    /** S3 object 'directory' prefix when uploading metadata about dicom study */
     public static final String METADATA_BUCKET_PREFIX = "metadata/";
-    // S3 object 'directory' prefix when uploading dicom file archive
+    /** S3 object 'directory' prefix when uploading dicom file archive */
     public static final String FILES_BUCKET_PREFIX = "files/";
-    // Default value 15 minutes if AE Title pair not configured (milliseconds)
-    // Study wait time is used as a timeout value to determine if all the files
-    // in a study have been received. DICOM transfers don't indicate how many
-    // files are in a study, so have to wait until they stop coming.
+    /**
+     * Default value 15 minutes if AE Title pair not configured (milliseconds)
+     * Study wait time is used as a timeout value to determine if all the files
+     * in a study have been received. DICOM transfers don't indicate how many
+     * files are in a study, so have to wait until they stop coming.
+     */
     public static final int DEFAULT_STUDY_WAIT_TIME = 900000;
 
     // Identifier for this dicom endpoint
